@@ -1,7 +1,7 @@
 
 <p align="center">
   <a href="https://example.com/">
-    <img src="https://via.placeholder.com/72" alt="Logo" width=72 height=72>
+    <img src="https://source.unsplash.com/SyzQ5aByJnE/200x200">
   </a>
 </p>
 <p align="center">
@@ -113,7 +113,7 @@ The app is split into two parts;
 2. You should see such a screen
 
 <p align-center>
-    <img src="https://via.placeholder.com/72" alt="Logo" width=72 height=72>
+    <img src="https://raw.githubusercontent.com/lewis-munyi/javascript-web-scraper/master/images/Homescreen.png" alt="Logo" width=72 height=72>
 </p>
 
 Yaay! It works.
