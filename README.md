@@ -145,7 +145,7 @@ That's it
 ## Built With
 
 * [Nuxt](https://nuxtjs.org/) - The web framework used
-* [Firebase](https://maven.apache.org/) - Cloud functions + storage + auth
+* [Firebase](https://firebase.google.com/) - Cloud functions + storage + auth
 * [Telegram](https://telegram.org/) - Bot platform
 
 ## Contributing
@@ -154,13 +154,13 @@ Currently accepting pull requests.
 
 ## Authors
 
-* **Lewis Munyi** - *Initial work* - [Website](https://lewismunyi.web.app)
+* **Lewis Munyi** - *Dev* - [Website](https://lewismunyi.web.app)
 
 See also the list of [contributors](https://github.com/lewis-munyi/javascript-web-scraper/tree/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GNU General Public License v3.0 License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
