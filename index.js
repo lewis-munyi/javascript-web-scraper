@@ -29,7 +29,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 let FieldValue = admin.firestore.FieldValue;
 
-let serviceAccount = require("./bikozulu-bot-firebase-adminsdk-vbv9g-83cefeb60b.json");
+let serviceAccount = require("./firebase-adminsdk.json");
 
 admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount)
