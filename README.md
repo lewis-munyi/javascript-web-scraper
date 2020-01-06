@@ -156,7 +156,7 @@ Currently accepting pull requests.
 
 * **Lewis Munyi** - *Dev* - [Website](https://lewismunyi.web.app)
 
-See also the list of [contributors](https://github.com/lewis-munyi/javascript-web-scraper/tree/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/lewis-munyi/javascript-web-scraper/graph/contributors) who participated in this project.
 
 ## License
 
