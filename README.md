@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-    A Node.js application that scraps posts off <a href="https://bikozulu.co.ke">Bikozulu</a>'s blog and sends them to users subscribed to a <a href="">Telegram bot</a>.
+    A Node.js application that scraps posts off of <a href="https://bikozulu.co.ke">Bikozulu</a>'s blog and sends them to users subscribed to a <a href="">Telegram bot</a>.
 </p>
 <p align="center">
     <a href="https://www.buymeacoff.ee/lewismunyi" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
@@ -26,7 +26,6 @@
     - [Running cloud functions](#running-cloud-functions)
 - [Deployment](#deployment)
 - [Built With](#built-with)
-- [Versioning](#versioning)
 - [Authors](#authors)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -144,8 +143,8 @@ That's it
 
 ## Built With
 
-* [Nuxt](https://nuxtjs.org/) - The web framework used
-* [Firebase](https://firebase.google.com/) - Cloud functions + storage + auth
+* [Nuxt](https://nuxtjs.org/) - Web framework
+* [Firebase](https://firebase.google.com/) - Cloud functions, storage, auth
 * [Telegram](https://telegram.org/) - Bot platform
 
 ## Contributing
@@ -165,5 +164,6 @@ This project is licensed under the GNU General Public License v3.0 License - see
 ## Acknowledgments
 
 * Hat tip to anyone whose code was used
+* Photo by <a href="https://unsplash.com/@ray30?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"> ray rui </a> on <a href="https://unsplash.com/s/photos/twitter?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
 
 Enjoy :metal:
