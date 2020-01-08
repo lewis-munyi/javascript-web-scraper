@@ -262,8 +262,8 @@ const updateLinks = async links => {
 
 async function mainFunction() {
 	/*
-	Start program and request for user action
-	**/
+	 * Start program and request for user action
+	 **/
 	readline.question(
 		`\n\tAhoy there!  What would you like to do?\n
 		${chalk.black.bgGreen(" 1.")} Fetch latest posts (default) \n

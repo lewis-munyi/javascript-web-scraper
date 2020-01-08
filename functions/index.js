@@ -57,9 +57,15 @@ const pushPostToFirestore = data => {
 					},
 					{ merge: true }
 				);
-				console.log(`\n  Pushed post to firestore. \n`);
+			} else if (key == "category") {
+				db.collection("misc")
+					.update({ categories: FieldValue.arrayUnion(value.name) })
+					.then(() => {
+						console.info("Pushed category");
+					});
 			}
 		}
+		console.log(`\n  Pushed post to firestore. \n`);
 	} catch (error) {
 		console.log(`\n  ${error} \n`);
 	}
@@ -323,5 +329,75 @@ exports.getUpdates = functions.https.onRequest(async (req, res) => {
 		.catch(err => {
 			console.error("Error getting document", err);
 			return res.status(500).json({ message: error });
+		});
+});
+
+/*
+ * Create get get all links function
+ * This function, when triggered, retrieves a list of all post links and post titles,
+ * sorts them by the time added in descending order and sends them to the user.
+ * */
+
+exports.getAllBlogLinks = functions.https.onRequest((req, res) => {
+	if (req.method !== "GET") {
+		return res.status(405).json({ message: "Method not allowed" });
+	}
+
+	let blogToSend = [];
+	const blog = db
+		.collection("blog")
+		.orderBy("timestamp", "desc")
+		.get()
+		.then(snapshot => {
+			snapshot.forEach(doc => {
+				blogToSend.push({ title: doc.data().title, url: doc.data().url, date: doc.data().date });
+			});
+			return res.status(200).json(blogToSend);
+		})
+		.catch(error => {
+			console.error(error);
+			return res.status(500).json(error);
+		});
+});
+
+/*
+ * Update categories collection
+ * This function, when triggered, retrieves a list of all posts,
+ * extracts their categories and pushed them into the collection.
+ * */
+
+exports.updateCategories = functions.https.onRequest((req, res) => {
+	db.collection("blog")
+		.get()
+		.then(snapshot => {
+			snapshot.forEach(doc => {
+				db.collection
+					.update({ categories: FieldValue.arrayUnion(doc.data().category.name) })
+					.then(() => {
+						return res.status(200).json({ message: "Successfully updated categories" });
+					})
+					.catch(error => {
+						return res.status(500).json(error);
+					});
+			});
+		})
+		.catch(error => {
+			return res.status(500).json(error);
+		});
+});
+
+/*
+ * Get a list of all categories
+ * */
+
+exports.getCategoryList = functions.https.onRequest((req, res) => {
+	db.collection("misc")
+		.doc("categories")
+		.get()
+		.then(doc => {
+			return res.status(200).json(doc.data().categories);
+		})
+		.catch(error => {
+			return res.status(500).json(error);
 		});
 });
