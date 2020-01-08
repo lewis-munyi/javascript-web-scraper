@@ -14,6 +14,31 @@ let db = admin.firestore();
 let FieldValue = admin.firestore.FieldValue;
 let FieldPath = admin.firestore.FieldPath;
 
+const getBlogUrls = async url => {
+	try {
+		console.info(`\n  Getting posts URLs from ${url}.  \n`);
+
+		const response = await axios.get(url);
+		const $ = cheerio.load(response.data);
+		const pageArticles = $("article");
+
+		let blogURLs = [];
+
+		pageArticles.each((index, article) => {
+			if ($(article).attr("itemtype") == "http://schema.org/Article") {
+				link = $(".post-title  a", article).attr("href") + " ".replace(/\s\s+/g, "");
+				blogURLs.push(link);
+			}
+		});
+
+		console.info(`  Extracted ${blogURLs.length} URLs.\n`);
+
+		return blogURLs;
+	} catch (error) {
+		console.error(`\n  ${error}:\n`);
+	}
+};
+
 const pushPostToFirestore = data => {
 	try {
 		for (const [key, value] of Object.entries(data)) {
@@ -233,5 +258,70 @@ exports.searchBlog = functions.https.onRequest((req, res) => {
 		.catch(error => {
 			// console.log("Error getting documents: ", error);
 			return res.status(500).json({ message: `Internal server error ${error}` });
+		});
+});
+
+/*
+ * Create get update function
+ * This function, when triggered, checks for updates from the blog
+ * and updates the "updates" collection.
+ * */
+
+exports.getUpdates = functions.https.onRequest(async (req, res) => {
+	if (req.method !== "GET") {
+		return res.status(405).json({ message: "Method not allowed" });
+	}
+
+	// Fetch URLs from home page
+	let links = await getBlogUrls("https://bikozulu.co.ke/");
+
+	// Fetch update URLs from firebase
+	const updates = db.collection("misc").doc("updates");
+
+	updates
+		.get()
+		.then(async doc => {
+			if (doc.exists) {
+				let newLinkUpdates = [];
+
+				/*
+				 * Check if there are any new updates.
+				 * If any, update the store and blog
+				 * */
+				for (let newLink of links) {
+					if (!doc.data().urls.includes(newLink)) {
+						newLinkUpdates.push(newLink);
+					}
+				}
+				newLinkUpdates = [...new Set(newLinkUpdates)];
+
+				if (newLinkUpdates.length !== 0) {
+					/*
+					 * Update the URLs in firestore
+					 * */
+
+					// Update "updates" collection
+					updates
+						.set({ timestamp: FieldValue.serverTimestamp(), urls: newLinkUpdates })
+						.then(() => {
+							console.info(`  Received ${newLinkUpdates.length} updates.  \n`);
+							return res.status(200).json({ message: `Updates complete. Received ${newLinkUpdates.length} updates.` });
+						})
+						.catch(error => {
+							console.error(`\n  ${error}\n`);
+							return res.status(500).json({ message: error });
+						});
+				} else {
+					console.log(`\n  No updates available\n`);
+					return res.status(200).json({ message: "No updates available" });
+				}
+			} else {
+				console.error(`\n  Firestore document is empty\n`);
+				return res.status(500).json({ message: "Firestore document is empty" });
+			}
+		})
+		.catch(err => {
+			console.error("Error getting document", err);
+			return res.status(500).json({ message: error });
 		});
 });
