@@ -14,6 +14,154 @@ let db = admin.firestore();
 let FieldValue = admin.firestore.FieldValue;
 let FieldPath = admin.firestore.FieldPath;
 
+const pushPostToFirestore = data => {
+	try {
+		for (const [key, value] of Object.entries(data)) {
+			if (key == "url") {
+				let blog = db.collection("blog").doc(value.slice(23, -1));
+				blog.set(data, { merge: true })
+					.then(() => {
+						// Promise
+					})
+					.catch(error => {
+						console.error(`\n  ${error} \n`);
+					});
+				blog.set(
+					{
+						timestamp: FieldValue.serverTimestamp()
+					},
+					{ merge: true }
+				);
+				console.log(`\n  Pushed post to firestore. \n`);
+			}
+		}
+	} catch (error) {
+		console.log(`\n  ${error} \n`);
+	}
+};
+
+const getFullPost = async url => {
+	/*
+	 * Scrap a full post's content and pass
+	 * it to the store method
+	 * */
+	try {
+		console.info(`\n  Scraping ${url}\n`);
+
+		// Get post
+		const response = await axios.get(url);
+		if (response.status === 200) {
+			console.info(`\n  Parsing data ... \n`);
+			const $ = cheerio.load(response.data);
+
+			// Initialize post object
+			let post = {
+				title: null,
+				url: null,
+				date: null,
+				body: null,
+				category: {
+					name: null,
+					url: null
+				}
+			};
+
+			// Get post html and iterate through the paragraphs, concatenating them with each other
+			const articleParagraphs = $(".post-content p");
+			let article = [];
+			articleParagraphs.each((index, paragraph) => {
+				article.push($(paragraph).text());
+			});
+
+			// Populate the post object with parsed data
+			post.title = $(".entry-title a")
+				.text()
+				.replace(/\s\s+/g, "");
+			post.url = $(".entry-title a")
+				.attr("href")
+				.replace(/\s\s+/g, "");
+			post.date = $(".post-date")
+				.text()
+				.replace(/\s\s+/g, "");
+			post.category.url = $(".post-meta a")
+				.attr("href")
+				.replace(/\s\s+/g, "");
+			post.category.name = $(".post-meta a")
+				.text()
+				.replace(/\s\s+/g, "");
+			post.body = article.join();
+
+			// Push the post to firestore
+			await pushPostToFirestore(post);
+
+			return post;
+		}
+	} catch (error) {
+		console.error(`\n ${error} \n`);
+	}
+};
+
+const updateLinks = async links => {
+	try {
+		await db
+			.doc("misc/links")
+			.get()
+			.then(doc => {
+				if (doc.exists) {
+					for (let link of links) {
+						if (!doc.data().urls.includes(link)) {
+							newLinks = doc.data().urls.concat(link);
+							uploadUrls(newLinks);
+						}
+					}
+				}
+			});
+	} catch (e) {
+		console.error(e);
+	}
+};
+
+const uploadUrls = async data => {
+	/*
+	 * Add/update the URLs in firestore
+	 * */
+
+	await db
+		.doc("misc/links")
+		.set({ timestamp: FieldValue.serverTimestamp(), urls: data })
+		.then(() => {
+			console.log(`  Pushed ${data.length} links to firestore  \n`);
+		})
+		.catch(error => {
+			console.error(`\n  ${error}\n`);
+		});
+};
+
+/*
+ * Create on update event listener
+ * This will trigger the scraper to fetch the post from the link(s) in the 'update'
+ * document.
+ * On complete it should update the `links` document and blog collection, then send to the Telegram bot
+ * */
+
+exports.updatesFound = functions.firestore.document("misc/updates").onUpdate(async (change, context) => {
+	// Get update(s) from firestore
+	const newLinkUpdates = change.after.data().urls;
+
+	// Upload new links(from the updates) to the links catalogue
+	console.log("Awaiting uploading new links to catalogue");
+	await updateLinks(newLinkUpdates);
+	console.log("Uploaded links to catalogue");
+
+	// Update posts collection
+	for (const link of newLinkUpdates) {
+		await getFullPost(link);
+	}
+
+	// Notify bot of update
+	console.log("Notifying bot of update ...");
+});
+
 /*
  * Create on post request function.
  * This function is triggered when a user(bot) sends a http request with the document id/url.
