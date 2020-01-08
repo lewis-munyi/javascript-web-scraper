@@ -199,3 +199,39 @@ exports.getSingleBlogPostFromFirebase = functions.https.onRequest((req, res) => 
 			return res.status(500).json({ message: `Internal server error ${error}` });
 		});
 });
+
+/*
+ * Create on search request function.
+ * This function is triggered when a user(bot) sends a http request with the the document query.
+ * The function returns a list of matching blog posts in JSON format
+ * */
+
+exports.searchBlog = functions.https.onRequest((req, res) => {
+	if (req.method !== "GET") {
+		return res.status(405).json({ message: "Method not allowed" });
+	}
+	function toTitleCase(str) {
+		return str.replace(/\w\S*/g, function(txt) {
+			return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+		});
+	}
+	db.collection("blog")
+		.orderBy("title")
+		.where("title", ">=", req.query.query)
+		.where("title", "<=", toTitleCase(req.query.query) + "z")
+		.get()
+		.then(function(querySnapshot) {
+			if (querySnapshot.empty) {
+				return res.status(404).json({ message: `Did not find any results for '${req.query.query}' :(` });
+			}
+			let responses = [];
+			querySnapshot.forEach(doc => {
+				responses.push(doc.data());
+			});
+			return res.status(200).json(responses);
+		})
+		.catch(error => {
+			// console.log("Error getting documents: ", error);
+			return res.status(500).json({ message: `Internal server error ${error}` });
+		});
+});
